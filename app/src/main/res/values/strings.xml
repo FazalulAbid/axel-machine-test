@@ -8,4 +8,5 @@
     <string name="couldn_t_reach_server">Could not reach server</string>
     <string name="login">Login</string>
     <string name="error_login_failed">Please enter a valid username and password</string>
+    <string name="todos">Todos</string>
 </resources>

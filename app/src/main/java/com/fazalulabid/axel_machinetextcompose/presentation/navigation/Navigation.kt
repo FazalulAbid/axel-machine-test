@@ -20,11 +20,10 @@ fun Navigation(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screens.Registration.route
+        startDestination = Screens.Home.route
     ) {
         composable(Screens.Home.route) {
             HomeScreen(
-                imageLoader = imageLoader,
                 paddingValues = paddingValues,
                 onNavigate = navController::navigate
             )
