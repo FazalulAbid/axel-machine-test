@@ -2,7 +2,7 @@
     <string name="app_name">Axel - Machine Text Compose</string>
     <string name="go_back">Go Back</string>
     <string name="save_changes">Save</string>
-    <string name="registration">Registration</string>
+    <string name="register">Register</string>
     <string name="error_unknown">Unknown Error</string>
     <string name="an_unexpected_error_occurred">An unexpected error occurred</string>
     <string name="couldn_t_reach_server">Could not reach server</string>
@@ -11,4 +11,5 @@
     <string name="todos">Todos</string>
     <string name="error_logout_failed">Logout failed</string>
     <string name="logout">Logout</string>
+    <string name="edit_profile">Update Profile</string>
 </resources>

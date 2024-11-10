@@ -20,7 +20,7 @@ class AccountRepositoryImpl @Inject constructor(
 
     override suspend fun login(username: String, password: String): Account? {
         val account = accountLocalDataSource.login(username, password) ?: return null
-        preferenceHelper.setLoggedInUser(account.username)
+        preferenceHelper.setLoggedInUser(account.id)
         return account
     }
 
@@ -30,7 +30,12 @@ class AccountRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getLoggedInAccount(): Account? {
-        val username = preferenceHelper.getLoggedInUser() ?: return null
-        return accountLocalDataSource.getAccount(username)
+        val userId = preferenceHelper.getLoggedInUserId()
+        if (userId < 1) return null
+        return accountLocalDataSource.getAccount(userId)
+    }
+
+    override suspend fun updateAccount(account: Account) {
+        accountLocalDataSource.updateAccount(account)
     }
 }

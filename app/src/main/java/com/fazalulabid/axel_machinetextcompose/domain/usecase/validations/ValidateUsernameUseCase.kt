@@ -4,10 +4,10 @@ import com.fazalulabid.axel_machinetextcompose.domain.repository.AccountReposito
 import com.fazalulabid.axel_machinetextcompose.domain.util.ValidationResult
 import javax.inject.Inject
 
-class IsUsernameExistsUseCase @Inject constructor(
+class ValidateUsernameUseCase @Inject constructor(
     private val accountRepository: AccountRepository
 ) {
-    suspend fun execute(username: String): ValidationResult {
+    suspend fun execute(username: String, isUpdate: Boolean = false): ValidationResult {
         if (username.isBlank()) {
             return ValidationResult(
                 successful = false,
@@ -15,12 +15,14 @@ class IsUsernameExistsUseCase @Inject constructor(
             )
         }
 
-        val isExists = accountRepository.isUsernameExists(username)
-        if (isExists) {
-            return ValidationResult(
-                successful = false,
-                errorMessage = "Username already exists"
-            )
+        if (!isUpdate) {
+            val isExists = accountRepository.isUsernameExists(username)
+            if (isExists) {
+                return ValidationResult(
+                    successful = false,
+                    errorMessage = "Username already exists"
+                )
+            }
         }
 
         return ValidationResult(successful = true)

@@ -7,6 +7,8 @@ data class RegistrationState(
 
     val profilePictureUri: Uri? = null,
 
+    val id: Int = 0,
+
     val username: String = "",
     val usernameError: String? = null,
 

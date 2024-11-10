@@ -49,6 +49,7 @@ fun Navigation(
                 imageLoader = imageLoader,
                 paddingValues = paddingValues,
                 editMode = editMode,
+                popBackStack = navController::popBackStack,
                 navigateToLogin = {
                     navController.navigate(Screens.Login.route) {
                         popUpTo(Screens.Registration.route) {

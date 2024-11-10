@@ -1,15 +1,16 @@
 package com.fazalulabid.axel_machinetextcompose.presentation.screens.registration
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fazalulabid.axel_machinetextcompose.core.util.Resource
 import com.fazalulabid.axel_machinetextcompose.domain.model.Account
+import com.fazalulabid.axel_machinetextcompose.domain.usecase.GetLoggedInAccountUseCase
 import com.fazalulabid.axel_machinetextcompose.domain.usecase.InsertAccountUseCase
-import com.fazalulabid.axel_machinetextcompose.domain.usecase.validations.IsUsernameExistsUseCase
+import com.fazalulabid.axel_machinetextcompose.domain.usecase.UpdateAccountUseCase
+import com.fazalulabid.axel_machinetextcompose.domain.usecase.validations.ValidateUsernameUseCase
 import com.fazalulabid.axel_machinetextcompose.domain.usecase.validations.ValidateDOBUseCase
 import com.fazalulabid.axel_machinetextcompose.domain.usecase.validations.ValidateEmailUseCase
 import com.fazalulabid.axel_machinetextcompose.domain.usecase.validations.ValidateFullNameUseCase
@@ -24,12 +25,14 @@ import javax.inject.Inject
 @HiltViewModel
 class RegistrationViewModel @Inject constructor(
     private val insertAccountUseCase: InsertAccountUseCase,
-    private val isUsernameExistsUseCase: IsUsernameExistsUseCase,
+    private val validateUsernameUseCase: ValidateUsernameUseCase,
     private val validateEmailUseCase: ValidateEmailUseCase,
     private val validateFullNameUseCase: ValidateFullNameUseCase,
     private val validatePasswordUseCase: ValidatePasswordUseCase,
     private val validateRepeatedPasswordUseCase: ValidateRepeatedPasswordUseCase,
-    private val validateDOBUseCase: ValidateDOBUseCase
+    private val validateDOBUseCase: ValidateDOBUseCase,
+    private val getLoggedInAccountUseCase: GetLoggedInAccountUseCase,
+    private val updateAccountUseCase: UpdateAccountUseCase
 ) : ViewModel() {
 
     private val _formState = mutableStateOf(RegistrationState())
@@ -83,12 +86,15 @@ class RegistrationViewModel @Inject constructor(
 
             RegistrationEvent.Submit -> {
                 viewModelScope.launch {
-                    submitData()
+                    if (_formState.value.isFormForEdit) {
+                        updateData()
+                    } else {
+                        saveData()
+                    }
                 }
             }
 
             is RegistrationEvent.IsFormForEdit -> {
-                Log.d("Hello", "onEvent: Is Edit = ${event.isEdit}")
                 _formState.value = _formState.value.copy(
                     isFormForEdit = event.isEdit
                 )
@@ -101,11 +107,77 @@ class RegistrationViewModel @Inject constructor(
     }
 
     private fun getUserDataForUpdate() {
+        viewModelScope.launch {
+            getLoggedInAccountUseCase(Unit).collect { result ->
+                when (result) {
+                    is Resource.Error -> {
+                        _eventFlow.emit(RegistrationUiEvent.ShowToast("Something went wrong!"))
+                    }
 
+                    is Resource.Loading -> Unit
+                    is Resource.Success -> {
+                        result.data?.let { account ->
+                            _formState.value = _formState.value.copy(
+                                id = account.id,
+                                username = account.username,
+                                fullName = account.fullName,
+                                dob = account.dob,
+                                profilePictureUri = account.profilePictureUri?.let { Uri.parse(it) }
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 
-    private suspend fun submitData() {
-        val usernameResult = isUsernameExistsUseCase.execute(_formState.value.username)
+    private suspend fun updateData() {
+        val usernameResult = validateUsernameUseCase.execute(_formState.value.username, true)
+        val fullNameResult = validateFullNameUseCase.execute(_formState.value.fullName)
+        val dobResult = validateDOBUseCase.execute(_formState.value.dob)
+
+        val hasError = listOf(
+            usernameResult,
+            fullNameResult,
+            dobResult
+        ).any { !it.successful }
+
+        if (hasError) {
+            _formState.value = _formState.value.copy(
+                usernameError = usernameResult.errorMessage,
+                fullNameError = fullNameResult.errorMessage,
+                dobError = dobResult.errorMessage
+            )
+            return
+        }
+        updateAccountUseCase(
+            Account(
+                id = _formState.value.id,
+                username = _formState.value.username,
+                fullName = _formState.value.fullName,
+                password = _formState.value.password,
+                dob = _formState.value.dob,
+                profilePictureUri = _formState.value.profilePictureUri?.toString()
+            )
+        ).collect { result ->
+            when (result) {
+                is Resource.Error -> {
+
+                }
+
+                is Resource.Loading -> {
+
+                }
+
+                is Resource.Success -> {
+                    _eventFlow.emit(RegistrationUiEvent.ProfileUpdated)
+                }
+            }
+        }
+    }
+
+    private suspend fun saveData() {
+        val usernameResult = validateUsernameUseCase.execute(_formState.value.username)
         val fullNameResult = validateFullNameUseCase.execute(_formState.value.fullName)
         val passwordResult = validatePasswordUseCase.execute(_formState.value.password)
         val repeatedPasswordResult = validateRepeatedPasswordUseCase.execute(
@@ -174,4 +246,5 @@ sealed class RegistrationEvent {
 sealed class RegistrationUiEvent {
     data class ShowToast(val message: String) : RegistrationUiEvent()
     data object RegistrationCompleted : RegistrationUiEvent()
+    data object ProfileUpdated : RegistrationUiEvent()
 }

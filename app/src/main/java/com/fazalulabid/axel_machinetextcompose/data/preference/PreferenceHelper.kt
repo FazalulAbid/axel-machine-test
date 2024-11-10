@@ -12,14 +12,14 @@ class PreferenceHelper @Inject constructor(
         const val LOGGED_IN_USER = "logged_in_user"
     }
 
-    fun setLoggedInUser(userId: String) {
+    fun setLoggedInUser(userId: Int) {
         sharedPreferences.edit {
-            putString(LOGGED_IN_USER, userId)
+            putInt(LOGGED_IN_USER, userId)
         }
     }
 
-    fun getLoggedInUser(): String? =
-        sharedPreferences.getString(LOGGED_IN_USER, null)
+    fun getLoggedInUserId(): Int =
+        sharedPreferences.getInt(LOGGED_IN_USER, 0)
 
     fun clearLoggedInUser() {
         sharedPreferences.edit {

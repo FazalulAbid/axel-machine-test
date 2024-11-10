@@ -43,7 +43,6 @@ import coil.ImageLoader
 import coil.compose.rememberImagePainter
 import com.fazalulabid.axel_machinetextcompose.R
 import com.fazalulabid.axel_machinetextcompose.presentation.components.StandardToolbar
-import com.fazalulabid.axel_machinetextcompose.presentation.navigation.Screens
 import com.fazalulabid.axel_machinetextcompose.presentation.ui.theme.OutlineColor
 import com.fazalulabid.axel_machinetextcompose.presentation.ui.theme.ProfilePictureSizeLarge
 import com.fazalulabid.axel_machinetextcompose.presentation.ui.theme.SpaceLarge
@@ -57,12 +56,12 @@ fun RegistrationScreen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
     imageLoader: ImageLoader,
+    popBackStack: () -> Unit = {},
     navigateToLogin: () -> Unit = {},
     onRegister: () -> Unit = {},
     viewModel: RegistrationViewModel = hiltViewModel(),
     editMode: Boolean = false,
 ) {
-
     val state = viewModel.formState.value
 
     val context = LocalContext.current
@@ -105,6 +104,11 @@ fun RegistrationScreen(
                 is RegistrationUiEvent.ShowToast -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
+
+                RegistrationUiEvent.ProfileUpdated -> {
+                    Toast.makeText(context, "Profile Updated", Toast.LENGTH_SHORT).show()
+                    popBackStack()
+                }
             }
         }
     }
@@ -126,7 +130,9 @@ fun RegistrationScreen(
             }
         }, title = {
             Text(
-                text = stringResource(R.string.registration),
+                text = stringResource(
+                    if (state.isFormForEdit) R.string.edit_profile else R.string.register
+                ),
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -208,55 +214,57 @@ fun RegistrationScreen(
             }
             Spacer(modifier = Modifier.height(SpaceMedium))
 
-            // Password
-            TextField(
-                value = state.password,
-                onValueChange = {
-                    viewModel.onEvent(RegistrationEvent.PasswordChanged(it))
-                },
-                isError = state.passwordError != null,
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = {
-                    Text(text = "Password")
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password
-                ),
-                visualTransformation = PasswordVisualTransformation()
-            )
-            if (state.passwordError != null) {
-                Text(
-                    text = state.passwordError,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.align(Alignment.End)
+            if (!state.isFormForEdit) {
+                // Password
+                TextField(
+                    value = state.password,
+                    onValueChange = {
+                        viewModel.onEvent(RegistrationEvent.PasswordChanged(it))
+                    },
+                    isError = state.passwordError != null,
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = {
+                        Text(text = "Password")
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password
+                    ),
+                    visualTransformation = PasswordVisualTransformation()
                 )
-            }
-            Spacer(modifier = Modifier.height(SpaceMedium))
+                if (state.passwordError != null) {
+                    Text(
+                        text = state.passwordError,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.End)
+                    )
+                }
+                Spacer(modifier = Modifier.height(SpaceMedium))
 
-            // Repeated Password
-            TextField(
-                value = state.repeatedPassword,
-                onValueChange = {
-                    viewModel.onEvent(RegistrationEvent.RepeatedPasswordChanged(it))
-                },
-                isError = state.repeatedPasswordError != null,
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = {
-                    Text(text = "Repeat Password")
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password
-                ),
-                visualTransformation = PasswordVisualTransformation()
-            )
-            if (state.repeatedPasswordError != null) {
-                Text(
-                    text = state.repeatedPasswordError,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.align(Alignment.End)
+                // Repeated Password
+                TextField(
+                    value = state.repeatedPassword,
+                    onValueChange = {
+                        viewModel.onEvent(RegistrationEvent.RepeatedPasswordChanged(it))
+                    },
+                    isError = state.repeatedPasswordError != null,
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = {
+                        Text(text = "Repeat Password")
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password
+                    ),
+                    visualTransformation = PasswordVisualTransformation()
                 )
+                if (state.repeatedPasswordError != null) {
+                    Text(
+                        text = state.repeatedPasswordError,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.End)
+                    )
+                }
+                Spacer(modifier = Modifier.height(SpaceMedium))
             }
-            Spacer(modifier = Modifier.height(SpaceMedium))
 
             // Date of Birth
             TextField(value = state.dob,
@@ -276,12 +284,13 @@ fun RegistrationScreen(
                     modifier = Modifier.align(Alignment.End)
                 )
             }
-
             Spacer(modifier = Modifier.height(SpaceMedium))
 
-            Text("Already a user? Click here to login", modifier.clickable {
-                navigateToLogin()
-            })
+            if (!state.isFormForEdit) {
+                Text("Already a user? Click here to login", modifier.clickable {
+                    navigateToLogin()
+                })
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.fazalulabid.axel_machinetextcompose.data.repository.account.data_source
 
+import android.util.Log
 import com.fazalulabid.axel_machinetextcompose.data.db.AccountDao
 import com.fazalulabid.axel_machinetextcompose.domain.model.Account
 
@@ -18,7 +19,20 @@ class AccountLocalDataSourceImpl(
         return accountDao.login(username, password)
     }
 
-    override suspend fun getAccount(username: String): Account? {
-        return accountDao.getAccount(username)
+    override suspend fun getAccount(id: Int): Account? {
+        Log.d("Hello", "getAccount: $id")
+        return accountDao.getAccount(id)
+    }
+
+    override suspend fun updateAccount(account: Account) {
+        Log.d("Hello", "updateAccount: ${account.toString()}")
+        val updatedRows = accountDao.updateAccount(
+            account.id,
+            account.username,
+            account.fullName,
+            account.dob,
+            account.profilePictureUri
+        )
+        Log.d("Hello", "updateAccount: $updatedRows")
     }
 }
