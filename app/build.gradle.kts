@@ -64,6 +64,8 @@ dependencies {
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.splashscreen)
+    implementation(libs.ucrop)
+    implementation("androidx.navigation:navigation-compose:2.5.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

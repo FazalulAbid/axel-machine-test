@@ -20,7 +20,7 @@ fun Navigation(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screens.Home.route
+        startDestination = Screens.Registration.route
     ) {
         composable(Screens.Home.route) {
             HomeScreen(
@@ -32,9 +32,17 @@ fun Navigation(
 
         composable(Screens.Registration.route) {
             RegistrationScreen(
+                onPopBackStack = navController::popBackStack,
                 imageLoader = imageLoader,
                 paddingValues = paddingValues,
-                onNavigate = navController::navigate
+                onNavigate = navController::navigate,
+                onRegister = {
+                    navController.popBackStack(
+                        route = Screens.Registration.route,
+                        inclusive = true
+                    )
+                    navController.navigate(Screens.Login.route)
+                },
             )
         }
 
