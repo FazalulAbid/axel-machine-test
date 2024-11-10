@@ -35,6 +35,10 @@ class HomeViewModel @Inject constructor(
             is HomeEvent.Logout -> {
                 logout()
             }
+
+            HomeEvent.GetTodos -> {
+                getTodos()
+            }
         }
     }
 
@@ -56,25 +60,30 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun getTodos() {
+        _state.value = state.value.copy(
+            isLoading = true,
+            hasError = false
+        )
         viewModelScope.launch {
             getTodosUseCase(Unit).collect { result ->
                 when (result) {
                     is Resource.Loading -> {
                         _state.value = state.value.copy(
-                            isLoading = true
+                            isLoading = true,
                         )
                     }
 
                     is Resource.Success -> {
                         _state.value = state.value.copy(
                             isLoading = false,
-                            todos = result.data ?: emptyList()
+                            todos = result.data ?: emptyList(),
                         )
                     }
 
                     is Resource.Error -> {
                         _state.value = state.value.copy(
-                            isLoading = false
+                            isLoading = false,
+                            hasError = true
                         )
                         _eventFlow.emit(
                             HomeUiEvent.ShowToast(result.uiText)
@@ -93,4 +102,5 @@ sealed class HomeUiEvent {
 
 sealed class HomeEvent {
     data object Logout : HomeEvent()
+    data object GetTodos : HomeEvent()
 }

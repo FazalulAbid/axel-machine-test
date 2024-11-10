@@ -1,12 +1,13 @@
 package com.fazalulabid.axel_machinetextcompose.presentation.screens.home
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,11 +26,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.fazalulabid.axel_machinetextcompose.R
 import com.fazalulabid.axel_machinetextcompose.presentation.components.StandardToolbar
 import com.fazalulabid.axel_machinetextcompose.presentation.screens.home.components.TodoItem
+import com.fazalulabid.axel_machinetextcompose.presentation.ui.theme.SpaceMedium
 import com.fazalulabid.axel_machinetextcompose.presentation.util.asString
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 @Composable
 fun HomeScreen(
@@ -41,6 +46,7 @@ fun HomeScreen(
 ) {
     val state = viewModel.state.value
     val context = LocalContext.current
+    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = state.isLoading)
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collect { event ->
@@ -56,7 +62,6 @@ fun HomeScreen(
                 }
             }
         }
-
     }
 
     Column(
@@ -92,25 +97,46 @@ fun HomeScreen(
             )
         })
 
-        Box(
-            modifier = Modifier
-                .fillMaxHeight(1f)
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center
+        SwipeRefresh(
+            state = swipeRefreshState,
+            onRefresh = {
+                viewModel.onEvent(HomeEvent.GetTodos)
+            }
         ) {
-            if (state.isLoading) {
-                CircularProgressIndicator()
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                ) {
-                    items(state.todos) {
-                        TodoItem(todo = it)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                if (state.isLoading) {
+                    CircularProgressIndicator()
+                } else if (state.hasError) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "Something went wrong!",
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(SpaceMedium))
+                        TextButton(onClick = {
+                            viewModel.onEvent(HomeEvent.GetTodos)
+                        }) {
+                            Text(text = "Refresh")
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(state.todos) { todo ->
+                            TodoItem(todo = todo)
+                        }
                     }
                 }
             }
         }
-
     }
 }

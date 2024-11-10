@@ -4,5 +4,6 @@ import com.fazalulabid.axel_machinetextcompose.domain.model.Todo
 
 data class HomeState(
     val isLoading: Boolean = false,
+    val hasError: Boolean = false,
     val todos: List<Todo> = emptyList()
 )
