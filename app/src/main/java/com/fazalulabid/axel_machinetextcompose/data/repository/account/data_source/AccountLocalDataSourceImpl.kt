@@ -17,4 +17,8 @@ class AccountLocalDataSourceImpl(
     override suspend fun login(username: String, password: String): Account? {
         return accountDao.login(username, password)
     }
+
+    override suspend fun getAccount(username: String): Account? {
+        return accountDao.getAccount(username)
+    }
 }

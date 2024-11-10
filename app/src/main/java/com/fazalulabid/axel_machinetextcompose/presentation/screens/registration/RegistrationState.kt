@@ -3,6 +3,8 @@ package com.fazalulabid.axel_machinetextcompose.presentation.screens.registratio
 import android.net.Uri
 
 data class RegistrationState(
+    val isFormForEdit: Boolean = false,
+
     val profilePictureUri: Uri? = null,
 
     val username: String = "",

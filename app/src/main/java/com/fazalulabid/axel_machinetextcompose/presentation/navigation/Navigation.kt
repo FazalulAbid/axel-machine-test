@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import coil.ImageLoader
 import com.fazalulabid.axel_machinetextcompose.presentation.screens.home.HomeScreen
 import com.fazalulabid.axel_machinetextcompose.presentation.screens.login.LoginScreen
@@ -16,23 +17,38 @@ fun Navigation(
     navController: NavHostController,
     paddingValues: PaddingValues,
     imageLoader: ImageLoader,
-    snackbarHostState: SnackbarHostState
+    startDestination: String = Screens.Home.route,
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screens.Home.route
+        startDestination = startDestination
     ) {
         composable(Screens.Home.route) {
             HomeScreen(
                 paddingValues = paddingValues,
-                onNavigate = navController::navigate
+                navigateToRegisterForEdit = {
+                    navController.navigate("${Screens.Registration.route}?editMode=true")
+                },
+                onLogout = {
+                    navController.navigate(Screens.Login.route) {
+                        popUpTo(Screens.Home.route) {
+                            inclusive = true
+                        }
+                    }
+                }
             )
         }
 
-        composable(Screens.Registration.route) {
+        composable(
+            route = "${Screens.Registration.route}?editMode={editMode}",
+            arguments = listOf(navArgument("editMode") { defaultValue = false })
+        ) { backStackEntry ->
+            val editMode = backStackEntry.arguments?.getBoolean("editMode") ?: false
+
             RegistrationScreen(
                 imageLoader = imageLoader,
                 paddingValues = paddingValues,
+                editMode = editMode,
                 navigateToLogin = {
                     navController.navigate(Screens.Login.route) {
                         popUpTo(Screens.Registration.route) {

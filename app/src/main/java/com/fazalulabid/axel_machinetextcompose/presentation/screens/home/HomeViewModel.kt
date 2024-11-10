@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.fazalulabid.axel_machinetextcompose.core.util.Resource
 import com.fazalulabid.axel_machinetextcompose.core.util.UiText
 import com.fazalulabid.axel_machinetextcompose.domain.usecase.GetTodosUseCase
+import com.fazalulabid.axel_machinetextcompose.domain.usecase.LogoutUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -15,7 +16,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val getTodosUseCase: GetTodosUseCase
+    private val getTodosUseCase: GetTodosUseCase,
+    private val logoutUseCase: LogoutUseCase
 ) : ViewModel() {
 
     private val _state = mutableStateOf(HomeState())
@@ -26,6 +28,31 @@ class HomeViewModel @Inject constructor(
 
     init {
         getTodos()
+    }
+
+    fun onEvent(event: HomeEvent) {
+        when (event) {
+            is HomeEvent.Logout -> {
+                logout()
+            }
+        }
+    }
+
+    private fun logout() {
+        viewModelScope.launch {
+            logoutUseCase(Unit).collect { result ->
+                when (result) {
+                    is Resource.Error -> {
+                        _eventFlow.emit(HomeUiEvent.ShowToast(result.uiText))
+                    }
+
+                    is Resource.Loading -> Unit
+                    is Resource.Success -> {
+                        _eventFlow.emit(HomeUiEvent.AccountLoggedOut)
+                    }
+                }
+            }
+        }
     }
 
     private fun getTodos() {
@@ -61,4 +88,9 @@ class HomeViewModel @Inject constructor(
 
 sealed class HomeUiEvent {
     data class ShowToast(val message: UiText?) : HomeUiEvent()
+    data object AccountLoggedOut : HomeUiEvent()
+}
+
+sealed class HomeEvent {
+    data object Logout : HomeEvent()
 }

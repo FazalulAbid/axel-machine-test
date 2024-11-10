@@ -6,4 +6,5 @@ interface AccountLocalDataSource {
     suspend fun insertAccount(account: Account)
     suspend fun isUsernameExists(username: String): Boolean
     suspend fun login(username: String, password: String): Account?
+    suspend fun getAccount(username: String): Account?
 }

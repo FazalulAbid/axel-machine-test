@@ -1,6 +1,7 @@
 package com.fazalulabid.axel_machinetextcompose.presentation.screens.registration
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -85,7 +86,22 @@ class RegistrationViewModel @Inject constructor(
                     submitData()
                 }
             }
+
+            is RegistrationEvent.IsFormForEdit -> {
+                Log.d("Hello", "onEvent: Is Edit = ${event.isEdit}")
+                _formState.value = _formState.value.copy(
+                    isFormForEdit = event.isEdit
+                )
+
+                if (event.isEdit) {
+                    getUserDataForUpdate()
+                }
+            }
         }
+    }
+
+    private fun getUserDataForUpdate() {
+
     }
 
     private suspend fun submitData() {
@@ -151,6 +167,7 @@ sealed class RegistrationEvent {
     data class PasswordChanged(val password: String) : RegistrationEvent()
     data class RepeatedPasswordChanged(val repeatedPassword: String) : RegistrationEvent()
     data class DateOfBirthChanged(val dob: String) : RegistrationEvent()
+    data class IsFormForEdit(val isEdit: Boolean) : RegistrationEvent()
     data object Submit : RegistrationEvent()
 }
 

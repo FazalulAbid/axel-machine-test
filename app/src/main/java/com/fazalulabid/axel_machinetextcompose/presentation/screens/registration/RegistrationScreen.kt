@@ -59,7 +59,8 @@ fun RegistrationScreen(
     imageLoader: ImageLoader,
     navigateToLogin: () -> Unit = {},
     onRegister: () -> Unit = {},
-    viewModel: RegistrationViewModel = hiltViewModel()
+    viewModel: RegistrationViewModel = hiltViewModel(),
+    editMode: Boolean = false,
 ) {
 
     val state = viewModel.formState.value
@@ -87,6 +88,10 @@ fun RegistrationScreen(
     ) {
         if (it == null) return@rememberLauncherForActivityResult
         cropProfilePictureLauncher.launch(it)
+    }
+
+    LaunchedEffect(key1 = true) {
+        viewModel.onEvent(RegistrationEvent.IsFormForEdit(editMode))
     }
 
     LaunchedEffect(key1 = true) {

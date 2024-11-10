@@ -9,4 +9,6 @@
     <string name="login">Login</string>
     <string name="error_login_failed">Please enter a valid username and password</string>
     <string name="todos">Todos</string>
+    <string name="error_logout_failed">Logout failed</string>
+    <string name="logout">Logout</string>
 </resources>
