@@ -43,6 +43,7 @@ import coil.ImageLoader
 import coil.compose.rememberImagePainter
 import com.fazalulabid.axel_machinetextcompose.R
 import com.fazalulabid.axel_machinetextcompose.presentation.components.StandardToolbar
+import com.fazalulabid.axel_machinetextcompose.presentation.navigation.Screens
 import com.fazalulabid.axel_machinetextcompose.presentation.ui.theme.OutlineColor
 import com.fazalulabid.axel_machinetextcompose.presentation.ui.theme.ProfilePictureSizeLarge
 import com.fazalulabid.axel_machinetextcompose.presentation.ui.theme.SpaceLarge
@@ -56,8 +57,7 @@ fun RegistrationScreen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
     imageLoader: ImageLoader,
-    onPopBackStack: () -> Unit = {},
-    onNavigate: (String) -> Unit,
+    navigateToLogin: () -> Unit = {},
     onRegister: () -> Unit = {},
     viewModel: RegistrationViewModel = hiltViewModel()
 ) {
@@ -105,7 +105,9 @@ fun RegistrationScreen(
     }
 
     Column(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
+            .padding(paddingValues)
     ) {
         StandardToolbar(onNavigateUp = {}, showBackArrow = false, navActions = {
             IconButton(onClick = {
@@ -271,6 +273,10 @@ fun RegistrationScreen(
             }
 
             Spacer(modifier = Modifier.height(SpaceMedium))
+
+            Text("Already a user? Click here to login", modifier.clickable {
+                navigateToLogin()
+            })
         }
     }
 }

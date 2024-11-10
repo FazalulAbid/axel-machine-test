@@ -32,10 +32,15 @@ fun Navigation(
 
         composable(Screens.Registration.route) {
             RegistrationScreen(
-                onPopBackStack = navController::popBackStack,
                 imageLoader = imageLoader,
                 paddingValues = paddingValues,
-                onNavigate = navController::navigate,
+                navigateToLogin = {
+                    navController.navigate(Screens.Login.route) {
+                        popUpTo(Screens.Registration.route) {
+                            inclusive = true
+                        }
+                    }
+                },
                 onRegister = {
                     navController.popBackStack(
                         route = Screens.Registration.route,
