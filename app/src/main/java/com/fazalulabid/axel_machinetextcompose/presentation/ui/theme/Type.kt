@@ -1,4 +1,4 @@
-package com.fazalulabid.axel_machinetextcompose.ui.theme
+package com.fazalulabid.axel_machinetextcompose.presentation.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
